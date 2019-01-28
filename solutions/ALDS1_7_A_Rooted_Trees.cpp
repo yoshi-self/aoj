@@ -52,10 +52,44 @@ struct Node {
   int right;
 };
 
+vector<Node> tree;
+
+string getNodeType(int n) {
+    string type = "internal node";
+    if(tree[n].parent == -1) {
+      type = "root";
+    }
+    else if(tree[n].left == -1) {
+      type = "leaf";
+    }
+    return type;
+}
+
+int getNodeDepth(int n) {
+  int depth = 0;
+  while(tree[n].parent != -1) {
+    depth++;
+    n = tree[n].parent;
+  }
+  return depth;
+}
+
+void getNodeChildren(int n, vector<int>& children) {
+  if(tree[n].left != -1) {
+      children.push_back(tree[n].left);
+      int t = tree[n].left;
+      while(tree[t].right != -1) {
+        children.push_back(tree[t].right);
+        t = tree[t].right;
+      }
+  }
+}
+
+
 int main() {
   int n;
   scanf("%d", &n);
-  vector<Node> v(n, {-1, -1, -1});
+  tree.resize(n, {-1, -1, -1});
 
   REP(i, n) {
     int id, k;
@@ -65,11 +99,11 @@ int main() {
       int c;
       scanf("%d", &c);
       if(j == 0) {
-        v[id].left = c; // child
+        tree[id].left = c; // child
       }
-      v[c].parent = id;
+      tree[c].parent = id;
       if(prev_c != -1) {
-        v[prev_c].right = c;
+        tree[prev_c].right = c;
       }
       prev_c = c;
     }
@@ -77,34 +111,13 @@ int main() {
 
 
   REP(i, n) {
-    Node node = v[i];
-    string type = "internal node";
-    if(node.parent == -1) {
-      type = "root";
-    }
-    else if(node.left == -1) {
-      type = "leaf";
-    }
-
-    int depth = 0;
-    int t = i;
-    while(v[t].parent != -1) {
-      depth++;
-      t = v[t].parent;
-    }
-
+    string type = getNodeType(i);
+    int depth = getNodeDepth(i);
     vector<int> children;
-    if(node.left != -1) {
-        children.push_back(node.left);
-        t = node.left;
-        while(v[t].right != -1) {
-          children.push_back(v[t].right);
-          t = v[t].right;
-        }
-    }
+    getNodeChildren(i, children);
     string children_str = join(children, ", ");
 
-    printf("node %d: parent = %d, depth = %d, %s, [%s]\n", i, v[i].parent, depth, type.c_str(), children_str.c_str());
+    printf("node %d: parent = %d, depth = %d, %s, [%s]\n", i, tree[i].parent, depth, type.c_str(), children_str.c_str());
   }
 
   return 0;
